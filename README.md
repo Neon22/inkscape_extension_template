@@ -1,0 +1,8 @@
+inkscape_extension_template
+===========================
+
+An explicit inkscape template to be modified to make new extensions.
+
+Making a new extenmsion in inkscape requires a UI.
+There are many fine extensions to use as examples but no single extension shows all the useful features.
+This extension shows example parameters to cut and paste as well as a useful tab layout incorporating help.
