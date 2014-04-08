@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+	<!-- _name must have same name as .py file-->
+	<_name>Template</_name>
+	<id>Render.Name_of_your_extension</id>
+	<dependency type="executable" location="extensions">template.py</dependency>
+	<!-- start notebook -->
+	<param name='active-tab' type="notebook">
+		<!-- one per page(tab) - unique names -->
+		<page name="title" _gui-text="Your Title">
+			<param name="param1"     type="int"     min="3"    max="1200"    _gui-text="A numeric integer value(3..1200)">24</param>
+			<param name="param2"     type="float"   min="0.1"  max="1000.0"	precision="5"	_gui-text="A floating value">1.0</param>
+			<param name="param3"    _gui-text="A Choice" type="optiongroup">
+				<_option value="choice1">Label for Choice 1</_option>
+				<_option value="choice2">Label for Choice 2</_option>
+				<_option value="choice3">Label for Choice 3</_option>
+			</param>
+			<_param name="help"     type="description" xml:space="preserve">------------------------------</_param>
+			<param name="achoice"   type="boolean" _gui-text="A boolean value">false</param>
+		</page>
+		<!-- next tab -->
+		<page name='advanced' _gui-text='Advanced options'>
+			<!-- enum with "minimal" appearance is similar to optiongroup -->
+			<param name="units"     type="optiongroup" appearance="minimal" _gui-text="Units">
+				<option value="mm">mm</option>
+				<option value="cm">cm</option>
+				<option value="in">in</option>
+				<option value="pt">pt</option>
+				<option value="px">px</option></param>
+	<!-- an unused parameter
+			<param name="not_implemented"	type="float" min="0"    max="1000"	precision="5"	_gui-text="missing feature">0.5</param>
+	-->
+			<param name="accuracy" type="enum" _gui-text="An enum">
+				<item value="0">automatic</item>
+				<item value="20">second choice</item>
+				<item value="12">third choice</item>
+				<item value="6">fourth choice</item>
+			</param>
+			<_param name="help" type="description">Some inline help.</_param>
+		</page>
+		<page name="Usage1" _gui-text="Usage">
+			<!-- space:preserve reqd for neat layout -->
+			<_param name="use1" type="description" xml:space="preserve">Mylabel:
+
+A pile of useful help and usage info.
+			</_param>
+		</page>
+		<page name="Usage2" _gui-text="Help">
+			<_param name="use2" type="description" xml:space="preserve">Your help
+Put your help in here.
+Remember that if this is very long you will need to pad the other tabs so they space out properly.
+Pad them with empty lines at the bottom to squeeze parameters up to the top.
+
+
+
+
+
+
+
+
+
+
+			</_param>
+		</page>
+	</param>
+	<!-- classify -->
+	<effect>
+	<object-type>all</object-type>
+		<effects-menu>
+			<submenu _name="Render"/> <!-- which menu in extensions -->
+		</effects-menu>
+	</effect>
+	<!-- py file again -->
+	<script>
+		<command reldir="extensions" interpreter="python">template.py</command>
+	</script>
+</inkscape-extension>
