@@ -69,15 +69,19 @@ def draw_SVG_circle(parent, r, cx, cy, name, style):
 ### Your main function subclasses the inkex.Effect class
 
 class Myextension(inkex.Effect): # choose a better name
+    
     def __init__(self):
-        inkex.Effect.__init__(self)
-        # an alternate way to get debug info:
-        # could use inkex.debug(string) instead...
+        " define how the options are mapped from the inx file "
+        inkex.Effect.__init__(self) # initialize the super class
+        
+        # Two ways to get debug info:
+        # could just use inkex.debug(string) instead...
         try:
             self.tty = open("/dev/tty", 'w')
         except:
             self.tty = open(os.devnull, 'w')  # '/dev/null' for POSIX, 'nul' for Windows.
             # print >>self.tty, "gears-dev " + __version__
+            
         # Define your list of parameters defined in the .inx file
         self.OptionParser.add_option("-t", "--param1",
                                      action="store", type="int",
@@ -98,6 +102,11 @@ class Myextension(inkex.Effect): # choose a better name
                                      action="store", type="string",
                                      dest="units", default='mm',
                                      help="Units this dialog is using")
+
+        self.OptionParser.add_option("", "--units2",
+                                     action="store", type="string",
+                                     dest="units2", default='mm',
+                                     help="command line help")
         
         self.OptionParser.add_option("-x", "--achoice",
                                      action="store", type="inkbool", 
@@ -108,7 +117,7 @@ class Myextension(inkex.Effect): # choose a better name
                                      action="store", type="int",
                                      dest="accuracy", default=0,
                                      help="command line help")
-        # here so we can have tabs - not used
+        # here so we can have tabs - but we do not use it directly - else error
         self.OptionParser.add_option("", "--active-tab",
                                      action="store", type="string",
                                      dest="active_tab", default='',
@@ -160,13 +169,15 @@ class Myextension(inkex.Effect): # choose a better name
         param2 = self.options.param2
         param3 = self.options.param3
         choice = self.options.achoice
+        units2 = self.options.units2
         accuracy = self.options.accuracy # although a string in inx - option parser converts to int.
         # calculate unit factor for units defined in dialog. 
         unit_factor = self.calc_unit_factor()
 
-        # Do your thing - create some points
+        # Do your thing - create some points or a path or whatever...
         points = []
-        points.extend( [ (i,i) for i in range(0, param1) ])
+        points.extend( [ (i*2,i*2) for i in range(0, param1) ])
+        points.append((param1, param1*2+5))
         #inkex.debug(points)
         path = points_to_svgd( points )
         #inkex.debug(path)
@@ -178,6 +189,7 @@ class Myextension(inkex.Effect): # choose a better name
 
         
         # Embed the path in a group to make animation easier:
+        # Be sure to examine the interanl structure by looking in the xml editor inside inkscape
         # This finds center of current view in inkscape
         t = 'translate(' + str( self.view_center[0] ) + ',' + str( self.view_center[1] ) + ')'
         # Make a nice useful name
