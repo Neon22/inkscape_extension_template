@@ -150,8 +150,8 @@ class Myextension(inkex.Effect): # choose a better name
               everything in inkscape is expected to be in 90dpi pixel units
         """
         # namedView = self.document.getroot().find(inkex.addNS('namedview', 'sodipodi'))
-        # doc_units = self.getUnittouu(1.0, namedView.get(inkex.addNS('document-units', 'inkscape')))
-        dialog_units = self.getUnittouu(1.0, self.options.units)
+        # doc_units = self.getUnittouu(str(1.0) + namedView.get(inkex.addNS('document-units', 'inkscape')))
+        dialog_units = self.getUnittouu(str(1.0) + self.options.units)
         unit_factor = 1.0 / dialog_units
         return unit_factor
 
