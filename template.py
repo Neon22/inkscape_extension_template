@@ -13,7 +13,7 @@ from math import cos, sin, radians
 
 __version__ = '0.1'
 
-
+inkex.localize()
 
 ### Your helper functions go here
 def points_to_svgd(p, close=True):
@@ -123,7 +123,11 @@ class Myextension(inkex.Effect): # choose a better name
                                      dest="active_tab", default='',
                                      help="Active tab. Not used now.")
         
-
+    def getUnittouu(self, param):
+        try:
+            return inkex.unittouu(param)
+        except AttributeError:
+            return self.unittouu(param)
     
     def add_text(self, node, text, position, text_height=12):
         """ Create and insert a single line of text into the svg under node.
@@ -146,8 +150,8 @@ class Myextension(inkex.Effect): # choose a better name
               everything in inkscape is expected to be in 90dpi pixel units
         """
         # namedView = self.document.getroot().find(inkex.addNS('namedview', 'sodipodi'))
-        # doc_units = inkex.uutounit(1.0, namedView.get(inkex.addNS('document-units', 'inkscape')))
-        dialog_units = inkex.uutounit(1.0, self.options.units)
+        # doc_units = self.getUnittouu(1.0, namedView.get(inkex.addNS('document-units', 'inkscape')))
+        dialog_units = self.getUnittouu(1.0, self.options.units)
         unit_factor = 1.0 / dialog_units
         return unit_factor
 
@@ -161,6 +165,12 @@ class Myextension(inkex.Effect): # choose a better name
               iterate through them
             - Turn on other visual features e.g. cross, rack, annotations, etc
         """
+        
+        # check for correct number of selected objects and return a translatable errormessage to the user
+        if len(self.options.ids) != 2:
+            inkex.errormsg(_("This extension requires two selected objects."))
+            exit()  
+        
         path_stroke = '#000000'  # might expose one day
         path_fill   = 'none'     # no fill - just a line
         path_stroke_width  = 0.6 # might expose one day
