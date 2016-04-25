@@ -32,5 +32,5 @@ color_blackandwhite
 
 
 dots:
-- indicate in UI that it operate son a selected path
+- indicate in UI that it operates on a selected path
 - copy the path first so is non-destructive

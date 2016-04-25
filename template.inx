@@ -2,8 +2,12 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
 	<!-- _name must have same name as .py file but capitalise it. Shows on Menu this way-->
 	<_name>Template</_name>
-	<id>Render.Name_of_your_extension</id>
+	<!-- id should be unique. Associates entered values with this menu -->
+	<id>githubacct.uniqueid.Name_of_your_extension</id>
+	<!-- mention a dependency here and will check for existence (optional)-->
 	<dependency type="executable" location="extensions">template.py</dependency>
+	<dependency type="executable" location="extensions">simplestyle.py</dependency>
+
 	<!-- start notebook -->
 	<param name='active-tab' type="notebook">
 		<!-- one per page(tab) - unique names -->
@@ -22,14 +26,14 @@
 		<!-- next tab -->
 		<page name='advanced' _gui-text='Advanced options'>
 			<!-- enum with "minimal" appearance is similar to optiongroup -->
-			<param name="units" type="optiongroup" appearance="minimal" _gui-text="Units">
+			<param name="units (minimal optiongroup)" type="optiongroup" appearance="minimal" _gui-text="Units">
 				<option value="mm">mm</option>
 				<option value="cm">cm</option>
 				<option value="in">in</option>
 				<option value="pt">pt</option>
 				<option value="px">px</option></param>
-			<!-- without "minimal" radio style -->
-			<param name="units2" type="optiongroup" _gui-text="Units2">
+			<!-- without "minimal" = radio style -->
+			<param name="units2 (optiongroup)" type="optiongroup" _gui-text="Units2">
 				<option value="mm">mm</option>
 				<option value="cm">cm</option>
 				<option value="in">in</option>
@@ -38,6 +42,7 @@
 	<!-- an unused parameter
 			<param name="not_implemented"	type="float" min="0"    max="1000"	precision="5"	_gui-text="missing feature">0.5</param>
 	-->
+			<!-- enum style stretches across page to left -->
 			<param name="accuracy" type="enum" _gui-text="An enum">
 				<item value="0">automatic</item>
 				<item value="20">second choice</item>
@@ -45,6 +50,12 @@
 				<item value="6">fourth choice</item>
 			</param>
 			<_param name="help" type="description">Some inline help.</_param>
+		</page>
+		<page name="colorex" _gui-text="More">
+			<param name="desc_unit" type="description">Any number of description items on page</param>
+			<param name="desc_unit" type="description">Only one color type on a page but can have many other params.</param>
+			<!-- color is just like an int. BUT only single use on a page-->
+			<param name="strokeColour" type="color" gui-text="Line colour: ">0</param>
 		</page>
 		<page name="Usage1" _gui-text="Usage">
 			<!-- space:preserve reqd for neat layout -->

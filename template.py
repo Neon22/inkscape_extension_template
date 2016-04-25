@@ -5,13 +5,14 @@ Example of extensions template for inkscape
 
 '''
 
-import inkex
-import simplestyle # will be needed for styles support
-import os # here for alt debug only
+import inkex       # Required
+import simplestyle # will be needed here for styles support
+import os          # here for alternative debug method only - so not usually required
+# many other useful ones in extensions folder. E.g. simplepath, cubicsuperpath, ...
 
 from math import cos, sin, radians
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 inkex.localize()
 
@@ -75,7 +76,7 @@ class Myextension(inkex.Effect): # choose a better name
         inkex.Effect.__init__(self) # initialize the super class
         
         # Two ways to get debug info:
-        # could just use inkex.debug(string) instead...
+        # OR just use inkex.debug(string) instead...
         try:
             self.tty = open("/dev/tty", 'w')
         except:
@@ -117,6 +118,10 @@ class Myextension(inkex.Effect): # choose a better name
                                      action="store", type="int",
                                      dest="accuracy", default=0,
                                      help="command line help")
+        self.OptionParser.add_option('-f', '--strokeColour', action = 'store',
+                                     type = 'string', dest = 'strokeColour',
+                                     default = 896839168, # Blue (see below how to discover value to put here)
+                                     help = 'The line colour.')
         # here so we can have tabs - but we do not use it directly - else error
         self.OptionParser.add_option("", "--active-tab",
                                      action="store", type="string",
@@ -124,10 +129,29 @@ class Myextension(inkex.Effect): # choose a better name
                                      help="Active tab. Not used now.")
         
     def getUnittouu(self, param):
+        " for 0.48 and 0.91 compatibility "
         try:
             return inkex.unittouu(param)
         except AttributeError:
             return self.unittouu(param)
+            
+    def unsignedLong(self, signedLongString):
+        " interpret the signed long as unsigned "
+        longColor = long(signedLongString)
+        if longColor < 0:
+            longColor = longColor & 0xFFFFFFFF
+        return longColor
+
+    #A*256^0 + B*256^1 + G*256^2 + R*256^3
+    def getColorString(self, longColor):
+        " convert the long into a #RRGGBB color value "
+        # use the next line to find out the value to put in Default color in the init options
+        #inkex.debug("%s" % (longColor) )
+        #
+        longColor = self.unsignedLong(longColor)
+        hexColor = hex(longColor)[2:-3]
+        hexColor = hexColor.rjust(6, '0')
+        return '#' + hexColor.upper()
     
     def add_text(self, node, text, position, text_height=12):
         """ Create and insert a single line of text into the svg under node.
@@ -151,8 +175,7 @@ class Myextension(inkex.Effect): # choose a better name
         """
         # namedView = self.document.getroot().find(inkex.addNS('namedview', 'sodipodi'))
         # doc_units = self.getUnittouu(str(1.0) + namedView.get(inkex.addNS('document-units', 'inkscape')))
-        dialog_units = self.getUnittouu(str(1.0) + self.options.units)
-        unit_factor = 1.0 / dialog_units
+        unit_factor = self.getUnittouu(str(1.0) + self.options.units)
         return unit_factor
 
 
@@ -169,11 +192,13 @@ class Myextension(inkex.Effect): # choose a better name
         # check for correct number of selected objects and return a translatable errormessage to the user
         if len(self.options.ids) != 2:
             inkex.errormsg(_("This extension requires two selected objects."))
-            exit()  
-        
-        path_stroke = '#000000'  # might expose one day
+            exit()
+        # Convert color - which comes in as a long into a string like '#FFFFFF'
+        self.options.strokeColour = self.getColorString(self.options.strokeColour)
+        #
+        path_stroke = self.options.strokeColour  # take color from tab3
         path_fill   = 'none'     # no fill - just a line
-        path_stroke_width  = 0.6 # might expose one day
+        path_stroke_width  = 0.6 # can also be in form '0.6mm'
         # gather incoming params and convert
         param1 = self.options.param1
         param2 = self.options.param2
@@ -183,6 +208,8 @@ class Myextension(inkex.Effect): # choose a better name
         accuracy = self.options.accuracy # although a string in inx - option parser converts to int.
         # calculate unit factor for units defined in dialog. 
         unit_factor = self.calc_unit_factor()
+        
+
 
         # Do your thing - create some points or a path or whatever...
         points = []
@@ -199,9 +226,11 @@ class Myextension(inkex.Effect): # choose a better name
 
         
         # Embed the path in a group to make animation easier:
-        # Be sure to examine the interanl structure by looking in the xml editor inside inkscape
+        # Be sure to examine the internal structure by looking in the xml editor inside inkscape
+        # This finds center of exisiting document page
+        
         # This finds center of current view in inkscape
-        t = 'translate(' + str( self.view_center[0] ) + ',' + str( self.view_center[1] ) + ')'
+        t = 'translate(%s,%s)' % (self.view_center[0], self.view_center[1] )
         # Make a nice useful name
         g_attribs = { inkex.addNS('label','inkscape'): 'useful name' + str( param1 ),
                       inkex.addNS('transform-center-x','inkscape'): str(-bbox_center[0]),
@@ -209,42 +238,62 @@ class Myextension(inkex.Effect): # choose a better name
                       'transform': t,
                       'info':'N: '+str(param1)+'; with:'+ str(param2) }
         # add the group to the document's current layer
-        g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs )
+        topgroup = inkex.etree.SubElement(self.current_layer, 'g', g_attribs )
 
         # Create SVG Path under this top level group
         # define style using basic dictionary
-        style = { 'stroke': path_stroke, 'fill': path_fill, 'stroke-width': path_stroke_width }
+        style = { 'stroke': path_stroke, 'fill': path_fill, 'stroke-width': param2 }
         # convert style into svg form (see import at top of file)
         mypath_attribs = { 'style': simplestyle.formatStyle(style), 'd': path }
         # add path to scene
-        gear = inkex.etree.SubElement(g, inkex.addNS('path','svg'), mypath_attribs )
+        squiggle = inkex.etree.SubElement(topgroup, inkex.addNS('path','svg'), mypath_attribs )
 
 
-        # Add another feature under it
-        style = { 'stroke': path_stroke, 'fill': path_fill, 'stroke-width': path_stroke }
-        cs = str(param1 / 3) # centercross length
-        d = 'M-'+cs+',0L'+cs+',0M0,-'+cs+'L0,'+cs  # 'M-10,0L10,0M0,-10L0,10'
+        # Add another feature in same group (under it)
+        style = { 'stroke': path_stroke, 'fill': path_fill, 'stroke-width': path_stroke_width }
+        cs = param1 / 2 # centercross length
+        cs2 = str(cs)
+        d = 'M-'+cs2+',0L'+cs2+',0M0,-'+cs2+'L0,'+cs2  # 'M-10,0L10,0M0,-10L0,10'
+        # or
+        d = 'M %s,0 L %s,0 M 0,-%s L 0,%s' % (-cs, cs, cs,cs)
+        # or
+        d = 'M {0},0 L {1},0 M 0,{0} L 0,{1}'.format(-cs,cs)
+        # or
+        #d = 'M-10 0L10 0M0 -10L0 10' # commas superfluous, minimise spaces.
         cross_attribs = { inkex.addNS('label','inkscape'): 'Center cross',
                           'style': simplestyle.formatStyle(style), 'd': d }
-        cross = inkex.etree.SubElement(g, inkex.addNS('path','svg'), cross_attribs )
+        cross = inkex.etree.SubElement(topgroup, inkex.addNS('path','svg'), cross_attribs )
 
 
         # Add a precalculated svg circle
-        style = { 'stroke': path_stroke, 'fill': path_fill, 'stroke-width': path_stroke }
-        draw_SVG_circle(g, param1*10/unit_factor, 0, 0, 'a circle', style)
+        style = { 'stroke': path_stroke, 'fill': path_fill, 'stroke-width': self.getUnittouu(str(param2) +self.options.units) }
+        draw_SVG_circle(topgroup, param1*4*unit_factor, 0, 0, 'a circle', style)
 
 
-        # Add some text
+        # Add some super basic text (e.g. for debug)
         if choice:
-            notes = ['a label: %d (%s) ' % (param1/unit_factor, self.options.units),
+            notes = ['a label: %d (%s) ' % (param1*unit_factor, self.options.units),
                      'doc line'
                      ]
             text_height = 12
             # position above
             y = - 22
             for note in notes:
-                self.add_text(g, note, [0,y], text_height)
+                self.add_text(topgroup, note, [0,y], text_height)
                 y += text_height * 1.2
+        #
+        #more complex text
+        font_height = min(32, max( 10, int(self.getUnittouu(str(param1) + self.options.units))))
+        text_style = { 'font-size': str(font_height),
+                       'font-family': 'arial',
+                       'text-anchor': 'middle',
+                       'text-align': 'center',
+                       'fill': path_stroke }
+        text_atts = {'style':simplestyle.formatStyle(text_style),
+                     'x': str(44),
+                     'y': str(-15) }
+        text = inkex.etree.SubElement(topgroup, 'text', text_atts)
+        text.text = "%4.3f" %(param1*param2)
 
 if __name__ == '__main__':
     e = Myextension()
