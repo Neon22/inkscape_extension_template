@@ -135,23 +135,18 @@ class Myextension(inkex.Effect): # choose a better name
         except AttributeError:
             return self.unittouu(param)
             
-    def unsignedLong(self, signedLongString):
-        " interpret the signed long as unsigned "
-        longColor = long(signedLongString)
-        if longColor < 0:
-            longColor = longColor & 0xFFFFFFFF
-        return longColor
-
-    #A*256^0 + B*256^1 + G*256^2 + R*256^3
-    def getColorString(self, longColor):
-        " convert the long into a #RRGGBB color value "
-        # use the next line to find out the value to put in Default color in the init options
-        #inkex.debug("%s" % (longColor) )
-        #
-        longColor = self.unsignedLong(longColor)
+    def getColorString(self, longColor, verbose=False):
+        """ Convert the long into a #RRGGBB color value
+            - verbose=true pops up value for us in defaults
+            conversion back is A + B*256^1 + G*256^2 + R*256^3
+        """
+        if verbose: inkex.debug("%s ="%(longColor))
+        longColor = long(longColor)
+        if longColor <0: longColor = long(longColor) & 0xFFFFFFFF
         hexColor = hex(longColor)[2:-3]
-        hexColor = hexColor.rjust(6, '0')
-        return '#' + hexColor.upper()
+        hexColor = '#' + hexColor.rjust(6, '0').upper()
+        if verbose: inkex.debug("  %s for color default value"%(hexColor))
+        return hexColor
     
     def add_text(self, node, text, position, text_height=12):
         """ Create and insert a single line of text into the svg under node.
