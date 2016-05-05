@@ -125,8 +125,8 @@ class Myextension(inkex.Effect): # choose a better name
         # here so we can have tabs - but we do not use it directly - else error
         self.OptionParser.add_option("", "--active-tab",
                                      action="store", type="string",
-                                     dest="active_tab", default='',
-                                     help="Active tab. Not used now.")
+                                     dest="active_tab", default='title', # use a legitmate default
+                                     help="Active tab.")
         
     def getUnittouu(self, param):
         " for 0.48 and 0.91 compatibility "
@@ -203,8 +203,8 @@ class Myextension(inkex.Effect): # choose a better name
         accuracy = self.options.accuracy # although a string in inx - option parser converts to int.
         # calculate unit factor for units defined in dialog. 
         unit_factor = self.calc_unit_factor()
-        
-
+        # what page are we on
+        page_id = self.options.active_tab # sometimes wrong the very first time
 
         # Do your thing - create some points or a path or whatever...
         points = []

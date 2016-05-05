@@ -10,7 +10,7 @@
 
 	<!-- start notebook -->
 	<param name='active-tab' type="notebook">
-		<!-- one per page(tab) - unique names -->
+		<!-- one per page(tab) - unique names. Can discover which page in program-->
 		<page name="title" _gui-text="Your Title">
 			<param name="param1" type="int"   min="3"    max="1200"    _gui-text="A numeric integer value(3..1200)">12</param>
 			<param name="param2" type="float" min="0.1"  max="1000.0"  precision="5"  _gui-text="A floating value">1.0</param>
@@ -26,14 +26,14 @@
 		<!-- next tab -->
 		<page name='advanced' _gui-text='Advanced options'>
 			<!-- enum with "minimal" appearance is similar to optiongroup -->
-			<param name="units (minimal optiongroup)" type="optiongroup" appearance="minimal" _gui-text="Units">
+			<param name="units" type="optiongroup" appearance="minimal" _gui-text="Units  (minimal optiongroup)">
 				<option value="mm">mm</option>
 				<option value="cm">cm</option>
 				<option value="in">in</option>
 				<option value="pt">pt</option>
 				<option value="px">px</option></param>
 			<!-- without "minimal" = radio style -->
-			<param name="units2 (optiongroup)" type="optiongroup" _gui-text="Units2">
+			<param name="units2" type="optiongroup" _gui-text="Units2  (optiongroup)">
 				<option value="mm">mm</option>
 				<option value="cm">cm</option>
 				<option value="in">in</option>
